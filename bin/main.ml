@@ -17,6 +17,10 @@ let split_addr addr =
     invalid_arg ("Invalid address: " ^ addr)
 
 let () =
+  if args.version then (
+    print_endline version_string;
+    exit 0);
+
   let config_path =
     match args.config with
     | Some p -> p
@@ -26,6 +30,8 @@ let () =
   in
 
   let config =
+    override_config
+    @@
     if not @@ Sys.file_exists config_path then (
       (if Filename.dirname config_path |> Sys.file_exists |> not then
          let rec mkdir_all path =
@@ -51,6 +57,11 @@ let () =
       In_channel.open_text config_path |> In_channel.input_all |> parse_config
   in
 
+  let db = Db.init config.database_path in
+
+  ignore db;
+  
+  let config = override_config config in
   let addr, port = split_addr config.listen_addr in
 
   Dream.run ~interface:addr ~port

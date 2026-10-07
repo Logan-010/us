@@ -13,7 +13,7 @@ let default_config =
   {
     listen_addr = "[::]:8913";
     secret = "change me!";
-    database_path = "urls.database";
+    database_path = "urls";
     tls = None;
     cert_path = None;
     key_path = None;
