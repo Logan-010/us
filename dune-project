@@ -15,10 +15,6 @@
 
 (documentation https://github.com/Logan-010/us)
 
-(env
- (release
-  (ocamlopt_flags (:standard -O3))))
-
 (package
  (name us)
  (synopsis "Private URL shortener")
