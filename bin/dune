@@ -1,4 +1,10 @@
 (executable
  (public_name us)
  (name main)
- (libraries dream dokeysto toml))
+ (libraries dream dokeysto toml)
+ (preprocess
+  (pps ppx_blob))
+ (preprocessor_deps
+  (file frontend/index.html)
+  (file frontend/icon.png)
+  (file frontend/style.css)))

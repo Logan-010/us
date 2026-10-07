@@ -59,8 +59,6 @@ let () =
 
   let db = Db.init config.database_path in
 
-  ignore db;
-  
   let config = override_config config in
   let addr, port = split_addr config.listen_addr in
 
@@ -68,13 +66,4 @@ let () =
     ~tls:(Option.value ~default:false config.tls)
     ~certificate_file:(Option.value ~default:"" config.cert_path)
     ~key_file:(Option.value ~default:"" config.key_path)
-  @@ Dream.logger
-  @@ Dream.router
-       [
-         Dream.get "/" (fun request ->
-             Dream.log "Sending greeting to %s!" (Dream.client request);
-             Dream.html "Good morning, world!");
-         Dream.get "/fail" (fun _ ->
-             Dream.warning (fun log -> log "Raising an exception!");
-             raise (Failure "The Web app failed!"));
-       ]
+  @@ Dream.router @@ Http.routes db

@@ -50,10 +50,11 @@
 
           duneVersion = "3";
 
-          propagatedBuildInputs = with ocamlPackages; [
-            dream
+          propagatedBuildInputs = [
+            ocamlPackages.dream
+            ocamlPackages.toml
+            ocamlPackages.ppx_blob
             dokeysto
-            toml
           ];
 
           nativeBuildInputs = [
@@ -70,8 +71,9 @@
             ocamlPackages.utop
             ocamlPackages.findlib
             ocamlPackages.dream
-            dokeysto
             ocamlPackages.toml
+            ocamlPackages.ppx_blob
+            dokeysto
           ];
         };
       }
