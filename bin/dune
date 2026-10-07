@@ -1,6 +1,7 @@
 (executable
  (public_name us)
  (name main)
+ (modes exe)
  (libraries dream dokeysto lwt)
  (preprocess
   (pps ppx_blob))
