@@ -1,0 +1,4 @@
+(executable
+ (public_name us)
+ (name main)
+ (libraries dream dokeysto toml))
