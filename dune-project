@@ -20,6 +20,6 @@
  (synopsis "Private URL shortener")
  (description
   "Private URL shortener designed for personal use (and preferablly behind a https proxy)")
- (depends ocaml toml dream dokeysto)
+ (depends ocaml dream dokeysto lwt ppx_blob)
  (tags
   ("url-shortener" "http" "server")))

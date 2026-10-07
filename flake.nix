@@ -52,7 +52,7 @@
 
           propagatedBuildInputs = [
             ocamlPackages.dream
-            ocamlPackages.toml
+            ocamlPackages.lwt
             ocamlPackages.ppx_blob
             dokeysto
           ];
@@ -71,7 +71,7 @@
             ocamlPackages.utop
             ocamlPackages.findlib
             ocamlPackages.dream
-            ocamlPackages.toml
+            ocamlPackages.lwt
             ocamlPackages.ppx_blob
             dokeysto
           ];

@@ -1,0 +1,97 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  background: #fafafa;
+  color: #222;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+main {
+  width: 100%;
+  max-width: 22rem;
+}
+
+h1 {
+  margin: 0;
+}
+
+h1,
+main > p {
+  text-align: center;
+}
+
+form {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+input,
+button {
+  width: 100%;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid #aaa;
+  border-radius: 0.35rem;
+  font: inherit;
+}
+
+input {
+  margin-bottom: 0.5rem;
+  background: #fff;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: #222;
+  color: #fff;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+:focus-visible {
+  outline: 2px solid #3678d4;
+  outline-offset: 3px;
+}
+
+#result {
+  color: #245eaa;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    background: #181818;
+    color: #eee;
+  }
+
+  input {
+    background: #252525;
+    border-color: #666;
+  }
+
+  button {
+    background: #eee;
+    color: #181818;
+  }
+
+  #result {
+    color: #8ab4f8;
+  }
+}

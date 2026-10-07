@@ -1,7 +1,7 @@
 (executable
  (public_name us)
  (name main)
- (libraries dream dokeysto toml)
+ (libraries dream dokeysto lwt)
  (preprocess
   (pps ppx_blob))
  (preprocessor_deps

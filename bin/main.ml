@@ -1,13 +1,15 @@
 open Cli
-open Config
 
 let split_addr addr =
   try
     let i = String.rindex addr ':' in
     let host =
-      if String.length addr > 0 && addr.[0] = '[' then String.sub addr 1 (i - 2)
+      if String.length addr > 0 && addr.[0] = '[' then (
+        if i < 3 || addr.[i - 1] <> ']' then invalid_arg "Invalid host";
+        String.sub addr 1 (i - 2))
       else String.sub addr 0 i
     in
+    if host = "" then invalid_arg "Invalid host";
     let port =
       int_of_string (String.sub addr (i + 1) (String.length addr - i - 1))
     in
@@ -16,54 +18,33 @@ let split_addr addr =
   with Not_found | Failure _ | Invalid_argument _ ->
     invalid_arg ("Invalid address: " ^ addr)
 
-let () =
+let main () =
   if args.version then (
     print_endline version_string;
     exit 0);
+  if args.delete then (
+    let db = Db.init args.database_path in
+    Fun.protect
+      ~finally:(fun () -> Dokeysto.Db.RW.close db)
+      (fun () -> Db.cleanup db);
+    exit 0);
 
-  let config_path =
-    match args.config with
-    | Some p -> p
-    | None ->
-        (if Sys.os_type = "Unix" then "HOME" else "USERPROFILE") |> Sys.getenv
-        |> fun d -> Filename.concat d @@ Filename.concat ".us" "config.toml"
+  let secret =
+    match args.secret with
+    | Some secret when secret <> "" -> secret
+    | _ -> invalid_arg "--secret is required and must not be empty"
   in
+  let addr, port = split_addr args.listen_addr in
+  let db = Db.init args.database_path in
+  Fun.protect
+    ~finally:(fun () -> Dokeysto.Db.RW.close db)
+    (fun () ->
+      Dream.run ~interface:addr ~port ~tls:args.tls
+        ~certificate_file:args.cert_path ~key_file:args.key_path
+      @@ Dream.router @@ Http.routes db secret)
 
-  let config =
-    override_config
-    @@
-    if not @@ Sys.file_exists config_path then (
-      (if Filename.dirname config_path |> Sys.file_exists |> not then
-         let rec mkdir_all path =
-           if Sys.file_exists path then
-             begin if not (Sys.is_directory path) then
-               failwith "Path exists but is not a directory"
-             end
-           else begin
-             mkdir_all (Filename.dirname path);
-             Sys.mkdir path 0o755
-           end
-         in
-
-         mkdir_all @@ Filename.dirname config_path);
-
-      let config_file = Out_channel.open_text config_path in
-      Out_channel.output_string config_file default_config_string;
-      Out_channel.flush config_file;
-      Out_channel.close config_file;
-
-      default_config)
-    else
-      In_channel.open_text config_path |> In_channel.input_all |> parse_config
-  in
-
-  let db = Db.init config.database_path in
-
-  let config = override_config config in
-  let addr, port = split_addr config.listen_addr in
-
-  Dream.run ~interface:addr ~port
-    ~tls:(Option.value ~default:false config.tls)
-    ~certificate_file:(Option.value ~default:"" config.cert_path)
-    ~key_file:(Option.value ~default:"" config.key_path)
-  @@ Dream.router @@ Http.routes db
+let () =
+  try main ()
+  with Invalid_argument message ->
+    prerr_endline ("us: " ^ message);
+    exit 2

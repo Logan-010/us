@@ -13,9 +13,10 @@ bug-reports: "https://github.com/Logan-010/us/issues"
 depends: [
   "dune" {>= "3.23"}
   "ocaml"
-  "toml"
   "dream"
   "dokeysto"
+  "lwt"
+  "ppx_blob"
   "odoc" {with-doc}
 ]
 build: [

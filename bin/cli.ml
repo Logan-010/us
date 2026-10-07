@@ -1,59 +1,70 @@
 type cli = {
   version : bool;
-  config : string option;
-  listen_addr : string option;
+  delete : bool;
+  listen_addr : string;
   secret : string option;
-  database_path : string option;
-  tls : bool option;
-  cert_path : string option;
-  key_path : string option;
+  database_path : string;
+  tls : bool;
+  cert_path : string;
+  key_path : string;
 }
 
 let help_menu =
-  "Usage: us [OPTIONS]\n\nPrivate URL shortener.\n\nCLI options override values in the config file.\n\nOptions:"
+  "Usage: us [OPTIONS]\n\n\
+   Private URL shortener.\n\n\
+   --secret/-s is required for running the server.\n\n\
+   Options:"
 
 let version_string = "us 0.1.0"
 
 let args =
   let version = ref false in
-  let config = ref None in
-  let listen_addr = ref None in
+  let delete = ref false in
+  let listen_addr = ref "[::]:8913" in
   let secret = ref None in
-  let database_path = ref None in
-  let tls = ref None in
-  let cert_path = ref None in
-  let key_path = ref None in
-  let set_string field = Arg.String (fun value -> field := Some value) in
+  let database_path = ref "urls" in
+  let tls = ref false in
+  let cert_path = ref "" in
+  let key_path = ref "" in
 
   let options =
     [
       ("--version", Arg.Set version, " Display version and exit");
       ("-v", Arg.Set version, " Display version and exit");
-      ("--config", set_string config, "PATH Load configuration from PATH");
-      ("-c", set_string config, "PATH Load configuration from PATH");
-      ("--listen-addr", set_string listen_addr, "ADDR Listening address (host:port)");
-      ("-l", set_string listen_addr, "ADDR Listening address (host:port)");
-      ("--secret", set_string secret, "SECRET Authentication secret");
-      ("-s", set_string secret, "SECRET Authentication secret");
-      ("--database-path", set_string database_path, "PATH Database file path");
-      ("-d", set_string database_path, "PATH Database file path");
+      ("--delete", Arg.Set delete, " Delete all stored URLs and exit");
+      ("-D", Arg.Set delete, " Delete all stored URLs and exit");
+      ( "--listen-addr",
+        Arg.Set_string listen_addr,
+        "ADDR Listening address (host:port; default: [::]:8913)" );
+      ("-l", Arg.Set_string listen_addr, "ADDR Listening address (host:port)");
+      ( "--secret",
+        Arg.String (fun value -> secret := Some value),
+        "SECRET Authentication secret (required)" );
+      ( "-s",
+        Arg.String (fun value -> secret := Some value),
+        "SECRET Authentication secret (required)" );
+      ( "--database-path",
+        Arg.Set_string database_path,
+        "PATH Database file path (default: urls)" );
+      ("-d", Arg.Set_string database_path, "PATH Database file path");
       ( "--tls",
-        Arg.Bool (fun value -> tls := Some value),
-        "BOOL Enable or disable TLS (true/false)" );
+        Arg.Bool (fun value -> tls := value),
+        "BOOL Enable or disable TLS (default: false)" );
       ( "-t",
-        Arg.Bool (fun value -> tls := Some value),
+        Arg.Bool (fun value -> tls := value),
         "BOOL Enable or disable TLS (true/false)" );
-      ("--cert-path", set_string cert_path, "PATH TLS certificate file path");
-      ("-C", set_string cert_path, "PATH TLS certificate file path");
-      ("--key-path", set_string key_path, "PATH TLS private key file path");
-      ("-k", set_string key_path, "PATH TLS private key file path");
+      ("--cert-path", Arg.Set_string cert_path, "PATH TLS certificate file path");
+      ("-C", Arg.Set_string cert_path, "PATH TLS certificate file path");
+      ("--key-path", Arg.Set_string key_path, "PATH TLS private key file path");
+      ("-k", Arg.Set_string key_path, "PATH TLS private key file path");
     ]
   in
   Arg.parse
     (options
     @ [
         ( "-h",
-          Arg.Unit (fun () -> raise (Arg.Help (Arg.usage_string options help_menu))),
+          Arg.Unit
+            (fun () -> raise (Arg.Help (Arg.usage_string options help_menu))),
           " Display help and exit" );
       ])
     (fun a -> raise (Arg.Bad (Printf.sprintf "Unknown command %s" a)))
@@ -61,23 +72,11 @@ let args =
 
   {
     version = !version;
-    config = !config;
+    delete = !delete;
     listen_addr = !listen_addr;
     secret = !secret;
     database_path = !database_path;
     tls = !tls;
     cert_path = !cert_path;
     key_path = !key_path;
-  }
-
-let override_config (config : Config.config) =
-  {
-    Config.listen_addr = Option.value ~default:config.listen_addr args.listen_addr;
-    secret = Option.value ~default:config.secret args.secret;
-    database_path = Option.value ~default:config.database_path args.database_path;
-    tls = (match args.tls with Some _ -> args.tls | None -> config.tls);
-    cert_path =
-      (match args.cert_path with Some _ -> args.cert_path | None -> config.cert_path);
-    key_path =
-      (match args.key_path with Some _ -> args.key_path | None -> config.key_path);
   }
